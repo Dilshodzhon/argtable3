@@ -340,6 +340,7 @@ char    *optarg;		/* argument associated with option */
 
 /* return values */
 #define	BADCH		(int)'?'
+#define	HASVALUE	(int)';'
 #define	BADARG		((*options == ':') ? (int)':' : (int)'?')
 #define	INORDER 	(int)1
 
@@ -533,7 +534,7 @@ parse_long_options(char * const *nargv, const char *options,
 				optopt = long_options[match].val;
 			else
 				optopt = 0;
-			return (BADARG);
+			return (HASVALUE);
 		}
 		if (long_options[match].has_arg == required_argument ||
 		    long_options[match].has_arg == optional_argument) {
@@ -1739,6 +1740,9 @@ static void arg_end_errorfn(
         break;
     case ARG_EMISSARG:
         fprintf(fp, "option \"%s\" requires an argument", argval);
+        break;
+    case ARG_EHASARG:
+        fprintf(fp, "option \"%s\" doesn't take an argument", argval);
         break;
     case ARG_ELONGOPT:
         fprintf(fp, "invalid option \"%s\"", argval);
@@ -4149,6 +4153,15 @@ void arg_parse_tagged(int argc,
              */
             /*printf(": option %s requires an argument\n",argv[optind-1]); */
             arg_register_error(endtable, endtable, ARG_EMISSARG,
+                               argv[optind - 1]);
+            break;
+
+         case ';':
+            /*
+             * getopt_long() found an option with its argument though it does not take.
+             */
+            /*printf(": option %s doesn't take an argument\n",argv[optind-1]); */
+            arg_register_error(endtable, endtable, ARG_EHASARG,
                                argv[optind - 1]);
             break;
 
